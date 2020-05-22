@@ -1,0 +1,70 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: account-management
+spec:
+  selector:
+    app: account-management
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9443
+    - name: admin
+      protocol: TCP
+      port: 9444
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: account-management
+  labels:
+    app: account-management
+spec:
+  minReadySeconds: 5
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: account-management
+      zone: bb-hsec
+  strategy:
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: account-management
+        zone: bb-hsec
+    spec:
+      containers:
+        - name: account-management
+         
+          image: registry-ci.at4d.liacloud.com/account-management:0.0.1
+         
+          ports:
+            - containerPort: 9443
+              name: app-http
+            - containerPort: 9443
+              name: admin-http
+            - containerPort: 9443
+              name: app-https
+            - containerPort: 9443
+              name: admin-https
+          imagePullPolicy: Always
+          
+          resources:
+            limits:
+              cpu: "2"
+              memory: 3Gi
+              ephemeral-storage: "2Gi"
+            requests:
+              cpu: "250m"
+              memory: 500Mi
+              ephemeral-storage: "500Mi"
+         
+      terminationGracePeriodSeconds: 60
+
+    
